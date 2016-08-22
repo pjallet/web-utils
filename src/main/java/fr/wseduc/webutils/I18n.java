@@ -80,6 +80,9 @@ public class I18n {
 		String text =  bundle.getString(key) != null ? bundle.getString(key) : key;
 		if (args.length > 0) {
 			for (int i = 0; i < args.length; i++) {
+				if (args[i] != null && args[i].contains("$")) {
+					args[i] = args[i].replaceAll("\\$", "_dollar_");
+				}
 				text = text.replaceAll("\\{" + i + "\\}", args[i]);
 			}
 		}
