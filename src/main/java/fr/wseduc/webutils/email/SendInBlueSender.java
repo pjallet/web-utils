@@ -22,19 +22,19 @@ import fr.wseduc.webutils.eventbus.ResultMessage;
 import fr.wseduc.webutils.exception.InvalidConfigurationException;
 import fr.wseduc.webutils.Either;
 import static fr.wseduc.webutils.Utils.isNotEmpty;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.http.HttpClient;
-import org.vertx.java.core.http.HttpClientRequest;
-import org.vertx.java.core.http.HttpClientResponse;
-import org.vertx.java.core.json.DecodeException;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
-import org.vertx.java.platform.Container;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.platform.Container;
 
 import java.io.IOException;
 import java.net.URI;
@@ -57,17 +57,18 @@ public class SendInBlueSender extends NotificationHelper implements EmailSender 
 	private final ObjectMapper mapper;
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
 
-	public SendInBlueSender(Vertx vertx, Container container, JsonObject config)
+	public SendInBlueSender(Vertx vertx, JsonObject config)
 			throws InvalidConfigurationException, URISyntaxException {
-		super(vertx, container);
+		super(vertx, config);
 		if (config != null && isNotEmpty(config.getString("uri")) && isNotEmpty(config.getString("api-key"))) {
 			URI uri = new URI(config.getString("uri"));
-			httpClient = vertx.createHttpClient()
-					.setHost(uri.getHost())
-					.setPort(uri.getPort())
-					.setMaxPoolSize(16)
-					.setSSL("https".equals(uri.getScheme()))
-					.setKeepAlive(false);
+			httpClient = vertx.createHttpClient().options(
+					uri.getPort(),
+					uri.getHost());
+//					.setPort()
+//					.setMaxPoolSize(16)
+//					.setSSL("https".equals(uri.getScheme()))
+//					.setKeepAlive(false);
 			apiKey = config.getString("api-key");
 			dedicatedIp = config.getString("ip");
 			splitRecipients = config.getBoolean("split-recipients", false);
@@ -90,12 +91,12 @@ public class SendInBlueSender extends NotificationHelper implements EmailSender 
 			return;
 		}
 		final DateFormat df = new SimpleDateFormat(DATE_FORMAT);
-		final JsonObject payload = new JsonObject().putString("event", "hard_bounce");
+		final JsonObject payload = new JsonObject().put("event", "hard_bounce");
 		final String start = df.format(startDate);
 		if (endDate != null) {
-			payload.putString("start_date", start).putString("end_date", df.format(endDate));
+			payload.put("start_date", start).put("end_date", df.format(endDate));
 		} else {
-			payload.putString("date", start);
+			payload.put("date", start);
 		}
 		HttpClientRequest req = httpClient.post("/v2.0/report", new Handler<HttpClientResponse>() {
 			@Override
@@ -159,7 +160,7 @@ public class SendInBlueSender extends NotificationHelper implements EmailSender 
 				}
 			};
 			for (Object to: json.getArray("to")) {
-				send(json.copy().putArray("to", new JsonArray().addString(to.toString())), h);
+				send(json.copy().put("to", new JsonArray().addString(to.toString())), h);
 			}
 		} else {
 			send(json, handler);
@@ -190,40 +191,40 @@ public class SendInBlueSender extends NotificationHelper implements EmailSender 
 		req.putHeader("api-key", apiKey);
 		JsonObject to = new JsonObject();
 		for (Object o: json.getArray("to")) {
-			to.putString(o.toString(), "");
+			to.put(o.toString(), "");
 		}
 		JsonObject payload = new JsonObject()
-				.putObject("to", to)
-				.putArray("from", new JsonArray().add(json.getString("from")))
-				.putString("subject", json.getString("subject"))
-				.putString("html", json.getString("body"));
+				.put("to", to)
+				.put("from", new JsonArray().add(json.getString("from")))
+				.put("subject", json.getString("subject"))
+				.put("html", json.getString("body"));
 		JsonObject headers = new JsonObject();
 		if (isNotEmpty(dedicatedIp)) {
-			headers.putString("X-Mailin-IP", dedicatedIp);
+			headers.put("X-Mailin-IP", dedicatedIp);
 		}
 		if (json.getArray("headers") != null) {
 			for (Object o: json.getArray("headers")) {
 				if (!(o instanceof JsonObject)) continue;
 				JsonObject h = (JsonObject) o;
-				headers.putString(h.getString("name"), h.getString("value"));
+				headers.put(h.getString("name"), h.getString("value"));
 			}
 		}
 		if (headers.size() > 0) {
-			payload.putObject("headers", headers);
+			payload.put("headers", headers);
 		}
 		if (json.getArray("cc") != null && json.getArray("cc").size() > 0) {
 			JsonObject cc = new JsonObject();
 			for (Object o: json.getArray("cc")) {
-				cc.putString(o.toString(), "");
+				cc.put(o.toString(), "");
 			}
-			payload.putObject("cc", cc);
+			payload.put("cc", cc);
 		}
 		if (json.getArray("bcc") != null && json.getArray("bcc").size() > 0) {
 			JsonObject bcc = new JsonObject();
 			for (Object o: json.getArray("bcc")) {
-				bcc.putString(o.toString(), "");
+				bcc.put(o.toString(), "");
 			}
-			payload.putObject("bcc", bcc);
+			payload.put("bcc", bcc);
 		}
 		req.end(payload.encode());
 	}

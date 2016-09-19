@@ -23,7 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.vertx.java.core.json.impl.Base64;
+import io.vertx.core.json.impl.Base64;
 
 public class HmacSha1 {
 

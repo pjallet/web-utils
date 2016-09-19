@@ -17,8 +17,8 @@
 package fr.wseduc.webutils.eventbus;
 
 import fr.wseduc.vertx.eventbus.EventBusWrapperFactory;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.eventbus.EventBus;
+import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 
 public class DefaultEventBusFactory implements EventBusWrapperFactory{
 

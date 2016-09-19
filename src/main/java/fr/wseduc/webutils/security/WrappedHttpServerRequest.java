@@ -16,14 +16,14 @@
 
 package fr.wseduc.webutils.security;
 
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.MultiMap;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.http.HttpServerFileUpload;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.http.HttpServerResponse;
-import org.vertx.java.core.http.HttpVersion;
-import org.vertx.java.core.net.NetSocket;
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServerFileUpload;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.http.HttpVersion;
+import io.vertx.core.net.NetSocket;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.security.cert.X509Certificate;
@@ -170,8 +170,8 @@ public class WrappedHttpServerRequest implements HttpServerRequest {
 	}
 
 	@Override
-	public HttpServerRequest expectMultiPart(boolean expect) {
-		request.expectMultiPart(expect);
+	public HttpServerRequest setExpectMultipart(boolean expect) {
+		request.setExpectMultipart(expect);
 		return this;
 	}
 

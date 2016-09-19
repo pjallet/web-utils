@@ -17,17 +17,17 @@
 package fr.wseduc.webutils.security;
 
 
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.VoidHandler;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.http.HttpClient;
-import org.vertx.java.core.http.HttpClientResponse;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.json.impl.Base64;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.VoidHandler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.impl.Base64;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -114,7 +114,7 @@ public final class JWT {
 									int idx = certificate.lastIndexOf(File.separator);
 									String crtName = (idx > -1) ? certificate.substring(idx + 1) : certificate;
 									crtName = crtName.substring(0, crtName.lastIndexOf("."));
-									certs.putString(crtName, asyncResult.result().toString());
+									certs.put(crtName, asyncResult.result().toString());
 								} else {
 									log.error("Error reading certificate : " + certificate, asyncResult.cause());
 								}
@@ -176,7 +176,7 @@ public final class JWT {
 							JsonObject c =  new JsonObject(buffer.toString("UTF-8"));
 							try {
 								CertificateFactory f = CertificateFactory.getInstance("X.509");
-								for (String a : c.getFieldNames()) {
+								for (String a : c.fieldNames()) {
 									String cert = c.getString(a);
 									if (cert != null) {
 										try {
@@ -284,9 +284,9 @@ public final class JWT {
 	}
 
 	public static String encodeAndSign(JsonObject payload, String kid, PrivateKey privateKey) throws Exception {
-		final JsonObject header = new JsonObject().putString("typ", "JWT").putString("alg", "RS256");
+		final JsonObject header = new JsonObject().put("typ", "JWT").put("alg", "RS256");
 		if (isNotEmpty(kid)) {
-			header.putString("kid", kid);
+			header.put("kid", kid);
 		}
 		final StringBuilder sb = new StringBuilder();
 		sb.append(base64Encode(header.encode())).append(".").append(base64Encode(payload.encode()));

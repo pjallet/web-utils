@@ -17,10 +17,10 @@
 package fr.wseduc.webutils.http.oauth;
 
 import fr.wseduc.webutils.security.JWT;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -48,7 +48,7 @@ public final class OpenIdConnectClient extends OAuth2Client {
 			@Override
 			public void handle(JsonObject res) {
 				if ("ok".equals(res.getString("status"))) {
-					String idToken = res.getObject("token", new JsonObject()).getString("id_token");
+					String idToken = res.getJsonObject("token", new JsonObject()).getString("id_token");
 					jwt.verifyAndGet(idToken, handler);
 				} else {
 					handler.handle(null);

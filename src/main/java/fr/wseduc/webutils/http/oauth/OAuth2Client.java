@@ -21,15 +21,14 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Map;
 
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.http.HttpClient;
-import org.vertx.java.core.http.HttpClientRequest;
-import org.vertx.java.core.http.HttpClientResponse;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.json.impl.Base64;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
 
 import fr.wseduc.webutils.http.Renders;
 
@@ -88,17 +87,17 @@ public class OAuth2Client {
 		String error = request.params().get("error");
 		JsonObject r = new JsonObject();
 		if (state != null && !state.equals(s)) {
-			handler.handle(r.putString("error", "invalid_state"));
+			handler.handle(r.put("error", "invalid_state"));
 			return;
 		}
 		if (error != null) {
-			handler.handle(r.putString("error", error));
+			handler.handle(r.put("error", error));
 			return;
 		}
 		try {
 			getAccessToken(code, basic, handler);
 		} catch (UnsupportedEncodingException e) {
-			handler.handle(r.putString("error", e.getMessage()));
+			handler.handle(r.put("error", e.getMessage()));
 		}
 	}
 
@@ -120,11 +119,11 @@ public class OAuth2Client {
 						JsonObject j = new JsonObject(r.toString("UTF-8"));
 						if (response.statusCode() == 200) {
 							JsonObject json = new JsonObject()
-							.putString("status", "ok")
-							.putObject("token", j);
+							.put("status", "ok")
+							.put("token", j);
 							handler.handle(json);
 						} else {
-							handler.handle(j.putNumber("statusCode", response.statusCode()));
+							handler.handle(j.put("statusCode", response.statusCode()));
 						}
 					}
 				});
@@ -158,11 +157,11 @@ public class OAuth2Client {
 						JsonObject j = new JsonObject(r.toString("UTF-8"));
 						if (response.statusCode() == 200) {
 							JsonObject json = new JsonObject()
-									.putString("status", "ok")
-									.putObject("token", j);
+									.put("status", "ok")
+									.put("token", j);
 							handler.handle(json);
 						} else {
-							handler.handle(j.putNumber("statusCode", response.statusCode()));
+							handler.handle(j.put("statusCode", response.statusCode()));
 						}
 					}
 				});

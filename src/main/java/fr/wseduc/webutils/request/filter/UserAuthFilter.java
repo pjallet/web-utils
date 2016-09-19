@@ -24,12 +24,12 @@ import fr.wseduc.webutils.security.oauth.OAuthResourceProvider;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
-import org.vertx.java.core.shareddata.ConcurrentSharedMap;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.shareddata.ConcurrentSharedMap;
 
 public class UserAuthFilter implements Filter, WithVertx {
 

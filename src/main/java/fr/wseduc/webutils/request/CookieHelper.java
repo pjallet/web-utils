@@ -27,8 +27,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.logging.Logger;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.logging.Logger;
 
 import fr.wseduc.webutils.security.HmacSha1;
 

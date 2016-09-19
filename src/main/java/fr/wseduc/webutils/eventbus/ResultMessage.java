@@ -16,25 +16,25 @@
 
 package fr.wseduc.webutils.eventbus;
 
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 public class ResultMessage implements Message<JsonObject> {
 
-	private final JsonObject body = new JsonObject().putString("status", "ok");
+	private final JsonObject body = new JsonObject().put("status", "ok");
 
 	public ResultMessage put(String attr, Object o) {
-		body.putValue(attr, o);
+		body.put(attr, o);
 		return this;
 	}
 
 	public ResultMessage error(String message) {
-		body.putString("status", "error");
-		body.putString("message", message);
+		body.put("status", "error");
+		body.put("message", message);
 		return this;
 	}
 

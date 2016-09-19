@@ -20,30 +20,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.wseduc.webutils.I18n;
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.platform.Container;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import fr.wseduc.webutils.http.Renders;
 
 public abstract class NotificationHelper implements SendEmail {
 
 	protected final Renders render;
-	protected final Logger log;
+	protected static final Logger log = LoggerFactory.getLogger(NotificationHelper.class);
 	protected final String senderEmail;
 	protected final String host;
 
-	public NotificationHelper(Vertx vertx, Container container) {
-		this.log = container.logger();
-		this.render = new Renders(vertx, container);
-		final Object encodedEmailConfig = vertx.sharedData().getMap("server").get("emailConfig");
+	public NotificationHelper(Vertx vertx, JsonObject config) {
+		this.render = new Renders(vertx, config);
+		final Object encodedEmailConfig = vertx.sharedData().getLocalMap("server").get("emailConfig");
 
 		String defaultMail = "noreply@one1d.fr";
 		String defaultHost = "http://localhost:8009";
@@ -54,8 +53,8 @@ public abstract class NotificationHelper implements SendEmail {
 			defaultHost = emailConfig.getString("host", defaultHost);
 		}
 
-		this.senderEmail = container.config().getString("email", defaultMail);
-		this.host = container.config().getString("host", defaultHost);
+		this.senderEmail = config.getString("email", defaultMail);
+		this.host = config.getString("host", defaultHost);
 	}
 
 	public void sendEmail(HttpServerRequest request, String to, String cc, String bcc,
@@ -115,36 +114,36 @@ public abstract class NotificationHelper implements SendEmail {
 			String subject, String templateBody, JsonObject templateParams,
 			boolean translateSubject, JsonArray headers, final Handler<Message<JsonObject>> handler) {
 		final JsonObject json = new JsonObject()
-			.putArray("to", new JsonArray(to))
-			.putString("from", from);
+			.put("to", new JsonArray(to))
+			.put("from", from);
 
 		if(cc != null){
-			json.putArray("cc", new JsonArray(cc));
+			json.put("cc", new JsonArray(cc));
 		}
 		if(bcc != null){
-			json.putArray("bcc", new JsonArray(bcc));
+			json.put("bcc", new JsonArray(bcc));
 		}
 
 		if (translateSubject) {
-			json.putString("subject", I18n.getInstance().translate(
+			json.put("subject", I18n.getInstance().translate(
 					subject, getHost(request), I18n.acceptLanguage(request)));
 		} else {
-			json.putString("subject", subject);
+			json.put("subject", subject);
 		}
 
 		if(headers != null){
-			json.putArray("headers", headers);
+			json.put("headers", headers);
 		}
 
 		Handler<String> mailHandler = new Handler<String>() {
 			public void handle(String body) {
 				if (body != null) {
-						json.putString("body", body);
+						json.put("body", body);
 						NotificationHelper.this.sendEmail(json, handler);
 				} else {
 					log.error("Message is null.");
 					Message<JsonObject> m = new ErrorMessage();
-					m.body().putString("error", "Message is null.");
+					m.body().put("error", "Message is null.");
 					handler.handle(m);
 				}
 			}

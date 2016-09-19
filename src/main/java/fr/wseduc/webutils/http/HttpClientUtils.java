@@ -16,16 +16,16 @@
 
 package fr.wseduc.webutils.http;
 
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.MultiMap;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.VoidHandler;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.http.HttpClient;
-import org.vertx.java.core.http.HttpClientRequest;
-import org.vertx.java.core.http.HttpClientResponse;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.core.Vertx;
+import io.vertx.core.VoidHandler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
 
 public class HttpClientUtils {
 
@@ -35,7 +35,7 @@ public class HttpClientUtils {
 		HttpClientRequest req = vertx.createHttpClient().setPort(port).post(uri, handler);
 
 		final String boundary = "dLV9Wyq26L_-JQxk6ferf-RT153LhOO";
-		Buffer buffer = new Buffer();
+		Buffer buffer = Buffer.buffer();
 		final String body = "--" + boundary + "\r\n" +
 				"Content-Disposition: form-data; name=\"file\"; filename=\""+ filename +"\"\r\n" +
 				"Content-Type: " + contentType + "\r\n" +
@@ -80,7 +80,7 @@ public class HttpClientUtils {
 						(cRes.statusCode() < 200 || (cRes.statusCode() >= 300 &&
 						cRes.statusCode() != 304))) {
 					if (defaultResult.getObject("headers") != null) {
-						for (String header: defaultResult.getObject("headers").getFieldNames()) {
+						for (String header: defaultResult.getObject("headers").fieldNames()) {
 							req.response().headers().add(header,
 									defaultResult.getObject("headers").getString(header));
 						}

@@ -18,16 +18,16 @@ package fr.wseduc.webutils;
 
 import java.io.UnsupportedEncodingException;
 
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.eventbus.EventBus;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.http.HttpServerFileUpload;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.http.HttpServerResponse;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerFileUpload;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import fr.wseduc.webutils.http.ETag;
 
@@ -35,18 +35,18 @@ public class FileUtils {
 
 	public static JsonObject metadata(HttpServerFileUpload upload) {
 		JsonObject metadata = new JsonObject();
-		metadata.putString("name", upload.name());
-		metadata.putString("filename", upload.filename());
-		metadata.putString("content-type", upload.contentType());
-		metadata.putString("content-transfer-encoding", upload.contentTransferEncoding());
-		metadata.putString("charset", upload.charset().name());
-		metadata.putNumber("size", upload.size());
+		metadata.put("name", upload.name());
+		metadata.put("filename", upload.filename());
+		metadata.put("content-type", upload.contentType());
+		metadata.put("content-transfer-encoding", upload.contentTransferEncoding());
+		metadata.put("charset", upload.charset());
+		metadata.put("size", upload.size());
 		return metadata;
 	}
 
 	public static void writeUploadFile(final HttpServerRequest request, final String filePath,
 			final Handler<JsonObject> handler) {
-		request.expectMultiPart(true);
+		request.setExpectMultipart(true);
 		request.uploadHandler(new Handler<HttpServerFileUpload>() {
 			@Override
 			public void handle(final HttpServerFileUpload upload) {
@@ -69,12 +69,12 @@ public class FileUtils {
 
 	public static void gridfsWriteUploadFile(final HttpServerRequest request, final EventBus eb,
 			final String gridfsAddress, final Long maxSize, final Handler<JsonObject> handler) {
-		request.expectMultiPart(true);
+		request.setExpectMultipart(true);
 		request.uploadHandler(new Handler<HttpServerFileUpload>() {
 			@Override
 			public void handle(final HttpServerFileUpload event) {
-				final Buffer buff = new Buffer();
-				event.dataHandler(new Handler<Buffer>() {
+				final Buffer buff = Buffer.buffer();
+				event.handler(new Handler<Buffer>() {
 					@Override
 					public void handle(Buffer event) {
 						buff.appendBuffer(event);
@@ -105,29 +105,29 @@ public class FileUtils {
 		final Handler<JsonObject> handler, EventBus eb, String contentType,
 		String filename, final JsonObject m, final String gridfsAddress) {
 		JsonObject save = new JsonObject();
-		save.putString("action", "save");
-		save.putString("content-type", contentType);
-		save.putString("filename", filename);
+		save.put("action", "save");
+		save.put("content-type", contentType);
+		save.put("filename", filename);
 		if (id != null && !id.trim().isEmpty()) {
-			save.putString("_id", id);
+			save.put("_id", id);
 		}
 		final JsonObject metadata = (m != null) ? m : new JsonObject()
-				.putString("content-type", contentType)
-				.putString("filename", filename);
+				.put("content-type", contentType)
+				.put("filename", filename);
 		if (metadata.getLong("size", 0l).equals(0l)) {
-			metadata.putNumber("size", buff.length());
+			metadata.put("size", buff.length());
 		}
 		if (maxSize != null && maxSize < metadata.getLong("size", 0l)) {
-			handler.handle(new JsonObject().putString("status", "error")
-				.putString("message", "file.too.large"));
+			handler.handle(new JsonObject().put("status", "error")
+				.put("message", "file.too.large"));
 			return;
 		}
 		byte [] header = null;
 		try {
 			header = save.toString().getBytes("UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			JsonObject json = new JsonObject().putString("status", "error")
-					.putString("message", e.getMessage());
+			JsonObject json = new JsonObject().put("status", "error")
+					.put("message", e.getMessage());
 			handler.handle(json);
 		}
 		if (header != null) {
@@ -136,7 +136,7 @@ public class FileUtils {
 				@Override
 				public void handle(Message<JsonObject> message) {
 					handler.handle(message.body()
-							.putObject("metadata", metadata));
+							.put("metadata", metadata));
 				}
 			});
 		}
@@ -145,16 +145,16 @@ public class FileUtils {
 	public static void gridfsReadFile(String id, final EventBus eb,
 			final String gridfsAddress, final Handler<Buffer> handler) {
 		JsonObject find = new JsonObject();
-		find.putString("action", "findone");
-		find.putObject("query", new JsonObject("{ \"_id\": \"" + id + "\"}"));
+		find.put("action", "findone");
+		find.put("query", new JsonObject("{ \"_id\": \"" + id + "\"}"));
 		byte [] header = null;
 		try {
 			header = find.toString().getBytes("UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			handler.handle(new Buffer());
+			handler.handle(Buffer.buffer());
 		}
 		if (header != null) {
-			Buffer buf = new Buffer(header);
+			Buffer buf = Buffer.buffer(header);
 			buf.appendInt(header.length);
 			eb.send(gridfsAddress, buf, new  Handler<Message>() {
 			@Override
@@ -229,22 +229,22 @@ public class FileUtils {
 	public static void gridfsRemoveFiles(JsonArray ids, EventBus eb, String gridfsAddress,
 			final Handler<JsonObject> handler) {
 		JsonObject find = new JsonObject();
-		find.putString("action", "remove");
+		find.put("action", "remove");
 		JsonObject query = new JsonObject();
 		if (ids != null && ids.size() == 1) {
-			query.putString("_id", ids.<String>get(0));
+			query.put("_id", ids.getString(0));
 		} else {
-			query.putObject("_id", new JsonObject().putArray("$in", ids));
+			query.put("_id", new JsonObject().put("$in", ids));
 		}
-		find.putObject("query", query);
+		find.put("query", query);
 		byte [] header = null;
 		try {
 			header = find.toString().getBytes("UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			handler.handle(new JsonObject().putString("status", "error"));
+			handler.handle(new JsonObject().put("status", "error"));
 		}
 		if (header != null) {
-			Buffer buf = new Buffer(header);
+			Buffer buf = Buffer.buffer(header);
 			buf.appendInt(header.length);
 			eb.send(gridfsAddress, buf, new  Handler<Message<JsonObject>>() {
 				@Override
@@ -260,16 +260,16 @@ public class FileUtils {
 	public static void gridfsCopyFile(String id, EventBus eb, String gridfsAddress,
 			final Handler<JsonObject> handler) {
 		JsonObject find = new JsonObject();
-		find.putString("action", "copy");
-		find.putObject("query", new JsonObject("{ \"_id\": \"" + id + "\"}"));
+		find.put("action", "copy");
+		find.put("query", new JsonObject("{ \"_id\": \"" + id + "\"}"));
 		byte [] header = null;
 		try {
 			header = find.toString().getBytes("UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			handler.handle(new JsonObject().putString("status", "error"));
+			handler.handle(new JsonObject().put("status", "error"));
 		}
 		if (header != null) {
-			Buffer buf = new Buffer(header);
+			Buffer buf = Buffer.buffer(header);
 			buf.appendInt(header.length);
 			eb.send(gridfsAddress, buf, new  Handler<Message<JsonObject>>() {
 				@Override

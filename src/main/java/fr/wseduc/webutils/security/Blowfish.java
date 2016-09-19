@@ -16,7 +16,7 @@
 
 package fr.wseduc.webutils.security;
 
-import org.vertx.java.core.json.impl.Base64;
+import io.vertx.core.json.impl.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;

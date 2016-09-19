@@ -16,17 +16,17 @@
 
 package fr.wseduc.webutils.validation;
 
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.AsyncResultHandler;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.eventbus.EventBus;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.file.FileSystem;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.AsyncResultHandler;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.file.FileSystem;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import java.io.File;
 
@@ -77,9 +77,9 @@ public class JsonSchemaValidator {
 									public void handle(AsyncResult<Buffer> event) {
 										if (event.succeeded()) {
 											JsonObject j = new JsonObject()
-													.putString("action","addSchema")
-													.putString("key", key)
-													.putObject("jsonSchema",
+													.put("action","addSchema")
+													.put("key", key)
+													.put("jsonSchema",
 															new JsonObject(event.result().toString()));
 											eb.publish(address, j);
 										} else {
@@ -99,9 +99,9 @@ public class JsonSchemaValidator {
 
 	public void validate(String schema, JsonObject json, AsyncResultHandler<Message<JsonObject>> handler) {
 		JsonObject j = new JsonObject()
-				.putString("action", "validate")
-				.putString("key", schema)
-				.putObject("json", json);
+				.put("action", "validate")
+				.put("key", schema)
+				.put("json", json);
 		eb.sendWithTimeout(address, j, 10000, handler);
 	}
 

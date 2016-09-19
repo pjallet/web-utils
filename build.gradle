@@ -1,52 +1,37 @@
-apply from: "gradle/vertx.gradle"
+plugins {
+  id 'java'
+  id 'application'
+  id 'com.github.johnrengelman.shadow' version '1.2.3'
+}
+
+repositories {
+  jcenter()
+  maven {
+    url "https://oss.sonatype.org/content/repositories/iovertx-2993"
+  }
+}
+
+version = '3.3.2'
+sourceCompatibility = '1.8'
 
 dependencies {
+  compile "io.vertx:vertx-core:$version"
 	compile "com.samskivert:jmustache:$mustacheVersion"
 	compile "fr.wseduc:eventbus-wrapper:$eventbusWrapperVersion"
-//  compile "org.owasp.esapi:esapi:$esapiVersion"
 }
 
-test {
+/*
+mainClassName = 'io.vertx.example.HelloWorldEmbedded'
+
+shadowJar {
+  classifier = 'fat'
+  mergeServiceFiles {
+    include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+  }
 }
 
-
-def configurePom(def pom) {
-	pom.project {
-    name 'web-utils'
-		description 'Vert.x web utils framework'
-		inceptionYear '2013'
-		packaging 'jar'
-		url 'https://github.com/web-education/web-utils'
-
-		developers {
-			developer {
-				id 'rafik.djedjig'
-				name 'Rafik Djedjig'
-				email 'rafik.djedjig@web-education.net'
-			}
-      developer {
-        id 'dboissin'
-        name 'Damien BOISSIN'
-        email 'damien.boissin@web-education.net'
-      }
-		}
-
-		scm {
-      connection 'scm:git:ssh://git@github.com:web-education/web-utils.git'
-      developerConnection 'scm:git:ssh://git@github.com:web-education/web-utils.git'
-      url 'https://github.com/web-education/web-utils.git'
-		}
-
-		licenses {
-			license {
-        name 'The Apache Software License, Version 2.0'
-        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-				distribution 'repo'
-			}
-		}
-
-		properties {
-			setProperty('project.build.sourceEncoding', 'UTF8')
-		}
-	}
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.8'
 }
+*/
+
